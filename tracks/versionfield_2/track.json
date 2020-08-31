@@ -1,0 +1,128 @@
+{% import "rally.helpers" as rally with context %}
+{
+  "version": 2,
+  "description": "Tracker-generated track for versionfield",
+  "indices": [
+    {
+      "name": "version-field-load-300",
+      "body": "version-field-load-300.json"
+    },
+    {
+      "name": "version-field-load-3000",
+      "body": "version-field-load-3000.json"
+    },
+    {
+      "name": "version-field-load-30000",
+      "body": "version-field-load-30000.json"
+    }
+  ],
+  "corpora": [
+    {
+      "name": "version-field-load-300",
+      "documents": [
+        {
+          "target-index": "version-field-load-300",
+          "source-file": "version-field-load-300-documents.json.bz2",
+          "document-count": 1000000,
+          "compressed-bytes": 1083511,
+          "uncompressed-bytes": 23724600
+        }
+      ]
+    },
+    {
+      "name": "version-field-load-3000",
+      "documents": [
+        {
+          "target-index": "version-field-load-3000",
+          "source-file": "version-field-load-3000-documents.json.bz2",
+          "document-count": 1000000,
+          "compressed-bytes": 1682431,
+          "uncompressed-bytes": 26137775
+        }
+      ]
+    },
+    {
+      "name": "version-field-load-30000",
+      "documents": [
+        {
+          "target-index": "version-field-load-30000",
+          "source-file": "version-field-load-30000-documents.json.bz2",
+          "document-count": 1000000,
+          "compressed-bytes": 2267919,
+          "uncompressed-bytes": 26404444
+        }
+      ]
+    }
+  ],
+  "schedule": [
+    {
+      "operation": "delete-index"
+    },
+    {
+      "operation": {
+        "operation-type": "create-index",
+        "settings": {{index_settings | default({}) | tojson}}
+      }
+    },
+    {
+      "operation": {
+        "operation-type": "cluster-health",
+        "index": "version-field-load-300,version-field-load-3000,version-field-load-30000",
+        "request-params": {
+          "wait_for_status": "{{cluster_health | default('green')}}",
+          "wait_for_no_relocating_shards": "true"
+        }
+      }
+    },
+    {
+      "operation": {
+        "operation-type": "bulk",
+        "bulk-size": {{bulk_size | default(5000)}},
+        "ingest-percentage": {{ingest_percentage | default(100)}}
+      },
+      "clients": {{bulk_indexing_clients | default(8)}}
+    },
+    {
+      "operation": {
+        "name": "range-query-300",
+        "index": "version-field-load-300",
+        "operation-type": "search",
+        "param-source": "my-custom-term-param-source",
+        "versions": ["1.1.1", "2.1.0", "5.0.2", "6.1.0", "6.8.9", "7.4.1", "7.8.1", "7.9.0", "7.9.1", "8.0.0"]
+      },
+      "clients": 1,
+      "cache" : false,
+      "warmup-iterations": 1000,
+      "iterations": 1000,
+      "target-throughput": 100
+    },
+    {
+      "operation": {
+        "name": "range-query-3000",
+        "index": "version-field-load-3000",
+        "operation-type": "search",
+        "param-source": "my-custom-term-param-source",
+        "versions": ["1.1.1", "2.1.0", "5.0.2", "6.1.0", "6.8.9", "7.4.1", "7.8.1", "7.9.0", "7.9.1", "8.0.0"]
+      },
+      "clients": 1,
+      "cache" : false,
+      "warmup-iterations": 1000,
+      "iterations": 1000,
+      "target-throughput": 100
+    },
+    {
+      "operation": {
+        "name": "range-query-30000",
+        "index": "version-field-load-30000",
+        "operation-type": "search",
+        "param-source": "my-custom-term-param-source",
+        "versions": ["1.1.1", "2.1.0", "5.0.2", "6.1.0", "6.8.9", "7.4.1", "7.8.1", "7.9.0", "7.9.1", "8.0.0"]
+      },
+      "clients": 1,
+      "cache" : false,
+      "warmup-iterations": 1000,
+      "iterations": 1000,
+      "target-throughput": 100
+    }
+  ]
+}
