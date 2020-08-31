@@ -1,7 +1,11 @@
-import random
+import random, sys, os
 
+fo = open(os.path.join(sys.path[0], "versionfield/all_versions.txt"), "r")
+print( "Reading versions from: ", fo.name)
+all_versions = fo.readlines()
+fo.close()
 
-def random_profession(track, params, **kwargs):
+def random_version(track, params, **kwargs):
     # choose a suitable index: if there is only one defined for this track
     # choose that one, but let the user always override index and type.
     if len(track.indices) == 1:
@@ -17,12 +21,10 @@ def random_profession(track, params, **kwargs):
     index_name = params.get("index", default_index)
     type_name = params.get("type", default_type)
 
-    # you must provide all parameters that the runner expects
-    versions = params["versions"]
-    lowerI = random.randint(0, len(versions) - 1)
-    lower = versions[lowerI]
-    upper = versions[random.randint(lowerI, len(versions) - 1)]
-    print("lower %s : upper %s" % (lower,upper))
+    lowerI = random.randint(0, len(all_versions) - 1)
+    lower = all_versions[lowerI]
+    upper = all_versions[random.randint(lowerI, len(all_versions) - 1)]
+    # print("lower %s : upper %s" % (lower,upper))
 
     return {
         "body": {
@@ -41,4 +43,4 @@ def random_profession(track, params, **kwargs):
     }
 
 def register(registry):
-    registry.register_param_source("my-custom-term-param-source", random_profession)
+    registry.register_param_source("my-custom-term-param-source", random_version)
